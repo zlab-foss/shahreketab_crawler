@@ -2,8 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Union
-from uuid import UUID
+from typing import List, Optional
 
 from src.crawler.domain import events
 
