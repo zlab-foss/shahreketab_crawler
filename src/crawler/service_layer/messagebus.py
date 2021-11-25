@@ -7,6 +7,7 @@ from src.crawler.domain import commands, events
 
 if TYPE_CHECKING:
     from src.crawler.service_layer import unit_of_work
+    from src.crawler.adapters import shahrekeetabonline
 
 logger = logging.getLogger(__name__)
 
@@ -17,10 +18,12 @@ class MessageBus:
     def __init__(
         self,
         uow: unit_of_work.AbstractUnitOfWork,
+        crawler: shahrekeetabonline.AbstractCrawler,
         event_handlers: Dict[Type[events.Event], List[Callable]],
         command_handlers: Dict[Type[commands.Command], Callable],
     ):
         self.uow = uow
+        self.crawler = crawler
         self.event_handlers = event_handlers
         self.command_handlers = command_handlers
 
