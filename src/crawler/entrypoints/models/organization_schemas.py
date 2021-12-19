@@ -42,4 +42,13 @@ class Organization(OrganizationBase):
     is_deleted: bool
 
 
+class OrganizationGet(BaseModel):
+    name: str
+    email: EmailStr
+    phone_number: Optional[str]
+    address: Optional[str]
+    province: Optional[str]
+    zipcode: Optional[str]
+    latitude: float
+    longitude: float
 

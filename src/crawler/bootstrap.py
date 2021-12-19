@@ -1,7 +1,7 @@
 import inspect
 
 from src.crawler.adapters import shahrekeetabonline, orm
-from src.crawler.service_layer import handlers, messagebus, unit_of_work
+from src.crawler.service_layer import messagebus, unit_of_work, handlers
 
 
 def bootstrap(

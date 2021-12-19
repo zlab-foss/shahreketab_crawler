@@ -15,4 +15,4 @@ RUN pip install --no-cache-dir -r /usr/app/requirements.txt
 
 COPY . .
 
-CMD ["uvicorn", "--host", "0.0.0.0" ," src.crawler.entrypoints.main:py"]
+CMD ["uvicorn", "--host", "0.0.0.0" ,"src.crawler.entrypoints.main:app"]
