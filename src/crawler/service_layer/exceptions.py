@@ -13,3 +13,15 @@ class IncorrectPassword(Exception):
 
 class InactiveOrganization(Exception):
     pass
+
+
+class InvalidLog(Exception):
+    pass
+
+
+class InvalidProduct(Exception):
+    pass
+
+
+class DuplicateProductID(Exception):
+    pass

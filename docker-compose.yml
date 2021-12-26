@@ -38,7 +38,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: migration_postgres
-    command: bash -c "cd /usr/app && alembic upgrade head"
+    command: bash -c "cd /usr/app && alembic revision --autogenerate -m "InitDB" && alembic upgrade head"
     depends_on:
       - postgresql
     networks:

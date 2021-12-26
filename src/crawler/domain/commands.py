@@ -8,6 +8,20 @@ class Command:
 
 
 @dataclass
+class AddOrganization(Command):
+    organization_name: str
+    password: str
+    email: Optional[str]
+    phone_number: Optional[str]
+    zipcode: Optional[str]
+    address: Optional[str]
+    province: Optional[str]
+    latitude: Optional[float]
+    longitude: Optional[float]
+
+
+
+@dataclass
 class CrawlProduct(Command):
-    id: UUID
+    id: int
     

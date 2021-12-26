@@ -40,15 +40,15 @@ def get_router(bus: messagebus.MessageBus):
     ):
         try:
             cmd = commands.AddOrganization(
-                req.name,
-                pwd_context.hash(req.password),
-                req.contact_info.email,
-                req.contact_info.phone_number,
-                req.geo_info.zipcode,
-                req.geo_info.address,
-                req.geo_info.province,
-                req.location.latitude,
-                req.location.longitude,
+                organization_name=req.name,
+                password=pwd_context.hash(req.password),
+                email=req.contact_info.email,
+                phone_number=req.contact_info.phone_number,
+                zipcode=req.geo_info.zipcode,
+                address=req.geo_info.address,
+                province=req.geo_info.province,
+                latitude=req.location.latitude,
+                longitude=req.location.longitude,
             )
             bus.handle(cmd)
 

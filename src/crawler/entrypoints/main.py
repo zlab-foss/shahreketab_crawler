@@ -6,7 +6,8 @@ from fastapi_jwt_auth.exceptions import AuthJWTException
 from src.crawler import bootstrap
 from src.crawler.entrypoints.routers import (
     organization,
-    products
+    products,
+    logs
 )
 
 app = FastAPI()
@@ -23,6 +24,7 @@ app.add_middleware(
 
 app.include_router(organization.get_router(bus))
 app.include_router(products.get_router(bus))
+app.include_router(logs.get_router(bus))
 
 
 

@@ -22,24 +22,35 @@ def get_router(bus: messagebus.MessageBus):
     router = APIRouter(prefix="/product", tags=["Product"])
 
     @router.post("/", status_code=status.HTTP_201_CREATED)
-    async def create_industry(
+    async def crawl_product(
         authorize: AuthJWT = Depends()
     ):
         authorize.jwt_required()
-        organization_id = authorize.get_jwt_subject()
+        authorize.get_jwt_subject()
         try:
-            pass
-        except (exceptions.DuplicateIndustry) as e:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"{e}")
+            last_crawled_product = views.get_last_log(bus.uow)
+            cmd = commands.CrawlProduct(
+                id=(last_crawled_product+1)
+            )
+            bus.handle(cmd)
+            
+        except exceptions.InvalidLog as e:
+            cmd = commands.CrawlProduct(id=1)
+            bus.handle(cmd)
+        except exceptions.DuplicateProductID as e:
+            raise HTTPException(status.HTTP_409_CONFLICT, detail=f"{e}")
 
 
 
-    @router.get("/{industry_id}", status_code=status.HTTP_200_OK, response_model=products_schema.Product)
-    async def get_industry_by_id(
-        industry_id:UUID ,authorize: AuthJWT = Depends()
+    @router.get("/{product_id}", status_code=status.HTTP_200_OK, response_model=products_schema.Product)
+    async def get_product_by_id(
+        product_id:int ,authorize: AuthJWT = Depends()
     ):
-        authorize.jwt_required() 
-        industry = views.get_industry_by_id(str(industry_id), bus.uow)
-        return industry
+        try:
+            authorize.jwt_required() 
+            product = views.get_product_by_id(str(product_id), bus.uow)
+            return product
+        except exceptions.InvalidProduct as e:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"{e}")
 
     return router

@@ -25,8 +25,7 @@ class Crawler(AbstractCrawler):
 
     def get_token(self, email: str, password: str):
         login_obj = requests.post(
-            # f"{str(config.Settings().get_shahreketab_setting()[0])}/Login",
-            f"{str(self._shahreketab_url)}/Login",
+            f"{str(config.Settings().get_shahreketab_setting()[0])}/Login",
             json={
                 "email": email,
                 "password": password

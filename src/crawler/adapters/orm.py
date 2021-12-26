@@ -25,11 +25,9 @@ products = Table(
     mapper_registry.metadata,
     Column(
         "id",
-        UUID(as_uuid=True),
+        Integer,
         primary_key=True,
-        index=True,
-        unique=True,
-        default=uuid.uuid4,
+        unique=True
     ),
     Column("name", String, nullable=False),
     Column("description", String),
@@ -56,7 +54,7 @@ logs = Table(
     ),
     Column(
         "product_id",
-        UUID(as_uuid=True),
+        Integer,
         ForeignKey("product.id"),
         nullable=False,
     ),
@@ -97,6 +95,8 @@ organizations = Table(
 def start_mapper():
     product_mapper = mapper_registry.map_imperatively(model.Product, products)
     
+    organization_mapper = mapper_registry.map_imperatively(model.Organization, organizations)
+
     log_mapper = mapper_registry.map_imperatively(
         model.Log,
         logs,

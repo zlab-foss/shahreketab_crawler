@@ -1,7 +1,6 @@
 from logging.config import fileConfig
 from src.crawler.adapters.orm import mapper_registry
 
-
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
