@@ -1,4 +1,5 @@
 import json
+import time
 from typing import Callable, Dict, List, Type
 from sqlalchemy import or_
 from datetime import datetime
@@ -46,33 +47,60 @@ def crawl_product(
     crawler: shahrekeetabonline.AbstractCrawler,
     uow: unit_of_work.AbstractUnitOfWork
 ):
-    product = crawler.get_products(cmd.id,(cmd.id+1),1)
-    with uow:
-        product_obj = uow.products.get_by_product_id(int(product['products'][0]['id']))
-        if product_obj:
-            raise DuplicateProductID(f"The Product with id '{product['products'][0]['id']}' already exists")
+    product = crawler.get_products(
+        from_id=cmd.id,
+        to_id=(cmd.id+1),
+        page=1)
 
-        new_product = model.Product(
-            id=product['products'][0]['id'],
-            name=product['products'][0]['name'],
-            description=product['products'][0]['description'],
-            type_id=product['products'][0]['typeID'],
-            available=product['products'][0]['available'],
-            express_delivery=product['products'][0]['expressDelivery'],
-            rating=product['products'][0]['averageRating'],
-            attributes=list(map(lambda x: json.dumps(x), product['products'][0]['attributes']))
-        )
-        uow.products.add(new_product)
-        uow.commit()
-        
-        write_log(
-            event= events.ProductCrawled(product_id=product['products'][0]['id']) , uow=uow
+    if product['products']:
+        with uow:
+            product_obj = uow.products.get_by_product_id(int(product['products'][0]['id']))
+            if product_obj:
+                raise DuplicateProductID(f"The Product with id '{product['products'][0]['id']}' already exists")
+
+            if 'description' in product['products'][0]:
+                new_product = model.Product(
+                    id=product['products'][0]['id'],
+                    name=product['products'][0]['name'],
+                    description=product['products'][0]['description'],
+                    type_id=product['products'][0]['typeID'],
+                    available=product['products'][0]['available'],
+                    express_delivery=product['products'][0]['expressDelivery'],
+                    rating=product['products'][0]['averageRating'],
+                    attributes=list(map(lambda x: json.dumps(x), product['products'][0]['attributes']))
+                )
+            else:
+                new_product = model.Product(
+                    id=product['products'][0]['id'],
+                    name=product['products'][0]['name'],
+                    description=None,
+                    type_id=product['products'][0]['typeID'],
+                    available=product['products'][0]['available'],
+                    express_delivery=product['products'][0]['expressDelivery'],
+                    rating=product['products'][0]['averageRating'],
+                    attributes=list(map(lambda x: json.dumps(x), product['products'][0]['attributes']))
+                )
+            uow.products.add(new_product)
+            uow.commit()
+            
+            write_log(
+                event= events.ProductCrawled(product_id=product['products'][0]['id']),
+                crawler=crawler,
+                uow=uow
+            )
+    else:
+        crawl_product(
+            cmd=commands.CrawlProduct(id=(cmd.id + 1)),
+            crawler=crawler,
+            uow=uow
         )
 
 
 
 def write_log(
-    event: events.ProductCrawled, uow: unit_of_work.SqlAlchemyUnitOfWork
+    event: events.ProductCrawled,
+    crawler: shahrekeetabonline.AbstractCrawler,
+    uow: unit_of_work.SqlAlchemyUnitOfWork
 ):
     with uow:
         new_log = model.Log(
@@ -81,6 +109,14 @@ def write_log(
         )
         uow.session.add(new_log)
         uow.commit()
+        
+        time.sleep(1)
+        
+        crawl_product(
+            cmd=commands.CrawlProduct(id=(event.product_id + 1)),
+            crawler=crawler,
+            uow=uow
+        )
 
 
 

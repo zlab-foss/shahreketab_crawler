@@ -30,7 +30,7 @@ def get_router(bus: messagebus.MessageBus):
         try:
             last_crawled_product = views.get_last_log(bus.uow)
             cmd = commands.CrawlProduct(
-                id=(last_crawled_product+1)
+                id=(int(last_crawled_product.product_id)+1)
             )
             bus.handle(cmd)
             
@@ -42,7 +42,7 @@ def get_router(bus: messagebus.MessageBus):
 
 
 
-    @router.get("/{product_id}", status_code=status.HTTP_200_OK, response_model=products_schema.Product)
+    @router.get("/{product_id}", status_code=status.HTTP_200_OK)
     async def get_product_by_id(
         product_id:int ,authorize: AuthJWT = Depends()
     ):

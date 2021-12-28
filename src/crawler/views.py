@@ -9,16 +9,16 @@ from src.crawler.service_layer.exceptions import *
 def get_product_by_id(
     product_id: str, uow: unit_of_work.SqlAlchemyUnitOfWork
 ):
-    try:
-        with uow:
-            product = uow.session.execute(
-                """SELECT *
-                    FROM product 
-                    WHERE "id" = :product_id""",
-                dict(product_id=str(product_id)),
-            ).fetchone()
+    with uow:
+        product = uow.session.execute(
+            """SELECT *
+                FROM product 
+                WHERE "id" = :product_id""",
+            dict(product_id=str(product_id)),
+        ).fetchone()
+    if product:
         return product
-    except:
+    else:
         raise exceptions.InvalidProduct("Invalid ProductID")
 
 
