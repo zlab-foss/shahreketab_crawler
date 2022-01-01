@@ -1,7 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime
-from typing import List, Optional
-from uuid import UUID
+from typing import  Optional
 
 class Command:
     pass
@@ -20,8 +18,12 @@ class AddOrganization(Command):
     longitude: Optional[float]
 
 
-
 @dataclass
 class CrawlProduct(Command):
     id: int
     
+
+@dataclass
+class DeleteProduct(Command):
+    organization_id: str
+    product_id: str

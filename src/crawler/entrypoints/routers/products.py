@@ -41,7 +41,6 @@ def get_router(bus: messagebus.MessageBus):
             raise HTTPException(status.HTTP_409_CONFLICT, detail=f"{e}")
 
 
-
     @router.get("/{product_id}", status_code=status.HTTP_200_OK)
     async def get_product_by_id(
         product_id:int ,authorize: AuthJWT = Depends()
@@ -50,6 +49,23 @@ def get_router(bus: messagebus.MessageBus):
             authorize.jwt_required() 
             product = views.get_product_by_id(str(product_id), bus.uow)
             return product
+        except exceptions.InvalidProduct as e:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"{e}")
+
+
+    @router.delete("/{product_id}", status_code=status.HTTP_200_OK)
+    async def delete_product(
+         product_id:int ,authorize: AuthJWT = Depends()
+    ):
+        authorize.jwt_required()
+        organization_id = authorize.get_jwt_subject()
+        try:
+            
+            cmd = commands.DeleteProduct(
+                str(organization_id),
+                str(product_id)
+            )
+            bus.handle(cmd)
         except exceptions.InvalidProduct as e:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"{e}")
 

@@ -52,7 +52,7 @@ def crawl_product(
         to_id=(cmd.id+1),
         page=1)
 
-    if product['products']:
+    if product['products'] & product['products'][0]['name']:
         with uow:
             product_obj = uow.products.get_by_product_id(int(product['products'][0]['id']))
             if product_obj:
@@ -96,6 +96,19 @@ def crawl_product(
         )
 
 
+def delete_product(
+    cmd: commands.DeleteProduct, uow: unit_of_work.AbstractUnitOfWork
+):
+    with uow:
+        product_obj = uow.products.get_by_product_id(int(cmd.product_id))
+        if not product_obj:
+            raise InvalidProduct("Invalid ProductID")
+        
+        uow.products.delete_by_product_id(product_id=product_obj.id)
+        uow.commit()
+
+
+
 
 def write_log(
     event: events.ProductCrawled,
@@ -127,4 +140,5 @@ EVENT_HANDLERS: Dict[Type[events.Event], List[Callable]] = {
 COMMAND_HANDLERS: Dict[Type[commands.Command], Callable] = {
     commands.AddOrganization: add_organization_info,
     commands.CrawlProduct: crawl_product,
+    commands.DeleteProduct: delete_product,
 }

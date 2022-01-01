@@ -34,26 +34,26 @@ def get_router(bus: messagebus.MessageBus):
     def get_config():
         return Configs()
 
-    @router.post("/", status_code=status.HTTP_201_CREATED)
-    async def create_organization(
-        req: organization_schemas.OrganizationSignup
-    ):
-        try:
-            cmd = commands.AddOrganization(
-                organization_name=req.name,
-                password=pwd_context.hash(req.password),
-                email=req.contact_info.email,
-                phone_number=req.contact_info.phone_number,
-                zipcode=req.geo_info.zipcode,
-                address=req.geo_info.address,
-                province=req.geo_info.province,
-                latitude=req.location.latitude,
-                longitude=req.location.longitude,
-            )
-            bus.handle(cmd)
+    # @router.post("/", status_code=status.HTTP_201_CREATED)
+    # async def create_organization(
+    #     req: organization_schemas.OrganizationSignup
+    # ):
+    #     try:
+    #         cmd = commands.AddOrganization(
+    #             organization_name=req.name,
+    #             password=pwd_context.hash(req.password),
+    #             email=req.contact_info.email,
+    #             phone_number=req.contact_info.phone_number,
+    #             zipcode=req.geo_info.zipcode,
+    #             address=req.geo_info.address,
+    #             province=req.geo_info.province,
+    #             latitude=req.location.latitude,
+    #             longitude=req.location.longitude,
+    #         )
+    #         bus.handle(cmd)
 
-        except exceptions.DuplicateOrganizationInfo as e:
-            raise HTTPException(status.HTTP_409_CONFLICT, detail=f"{e}")
+    #     except exceptions.DuplicateOrganizationInfo as e:
+    #         raise HTTPException(status.HTTP_409_CONFLICT, detail=f"{e}")
 
 
     @router.get("/me", status_code=status.HTTP_200_OK, response_model=organization_schemas.OrganizationGet)

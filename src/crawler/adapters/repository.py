@@ -18,6 +18,9 @@ class AbstractRepository(abc.ABC):
         if product:
             self.seen.add(product)
         return product
+    
+    def delete_by_product_id(self, product_id):
+        self._delete_by_product_id(product_id)
 
 
     @abc.abstractmethod
@@ -27,6 +30,11 @@ class AbstractRepository(abc.ABC):
     @abc.abstractmethod
     def _get_by_product_id(self, product_id) -> model.Product:
         raise NotImplementedError
+
+    @abc.abstractmethod
+    def _delete_by_product_id(self, product_id):
+        raise NotImplementedError
+
 
 
 class SqlAlchemyRepository(AbstractRepository):
@@ -43,3 +51,8 @@ class SqlAlchemyRepository(AbstractRepository):
             .filter(orm.products.c.id == product_id)
             .first()
         )
+    
+    def _delete_by_product_id(self, product_id):
+        self.session.query(model.Product).filter_by(id=product_id).delete()
+
+
