@@ -41,7 +41,6 @@ def add_organization_info(
         uow.commit()
 
 
-
 def crawl_product(
     cmd: commands.CrawlProduct,
     crawler: shahrekeetabonline.AbstractCrawler,
@@ -52,42 +51,49 @@ def crawl_product(
         to_id=(cmd.id+1),
         page=1)
 
-    if product['products'] & product['products'][0]['name']:
-        with uow:
-            product_obj = uow.products.get_by_product_id(int(product['products'][0]['id']))
-            if product_obj:
-                raise DuplicateProductID(f"The Product with id '{product['products'][0]['id']}' already exists")
+    if product['products']:
+        if product['products'][0]['name']:
+            with uow:
+                product_obj = uow.products.get_by_product_id(int(product['products'][0]['id']))
+                if product_obj:
+                    raise DuplicateProductID(f"The Product with id '{product['products'][0]['id']}' already exists")
 
-            if 'description' in product['products'][0]:
-                new_product = model.Product(
-                    id=product['products'][0]['id'],
-                    name=product['products'][0]['name'],
-                    description=product['products'][0]['description'],
-                    type_id=product['products'][0]['typeID'],
-                    available=product['products'][0]['available'],
-                    express_delivery=product['products'][0]['expressDelivery'],
-                    rating=product['products'][0]['averageRating'],
-                    attributes=list(map(lambda x: json.dumps(x), product['products'][0]['attributes']))
+                if 'description' in product['products'][0]:
+                    new_product = model.Product(
+                        id=product['products'][0]['id'],
+                        name=product['products'][0]['name'],
+                        description=product['products'][0]['description'],
+                        type_id=product['products'][0]['typeID'],
+                        available=product['products'][0]['available'],
+                        express_delivery=product['products'][0]['expressDelivery'],
+                        rating=product['products'][0]['averageRating'],
+                        attributes=list(map(lambda x: json.dumps(x), product['products'][0]['attributes']))
+                    )
+                else:
+                    new_product = model.Product(
+                        id=product['products'][0]['id'],
+                        name=product['products'][0]['name'],
+                        description=None,
+                        type_id=product['products'][0]['typeID'],
+                        available=product['products'][0]['available'],
+                        express_delivery=product['products'][0]['expressDelivery'],
+                        rating=product['products'][0]['averageRating'],
+                        attributes=list(map(lambda x: json.dumps(x), product['products'][0]['attributes']))
+                    )
+                uow.products.add(new_product)
+                uow.commit()
+                
+                write_log(
+                    event= events.ProductCrawled(product_id=product['products'][0]['id']),
+                    crawler=crawler,
+                    uow=uow
                 )
-            else:
-                new_product = model.Product(
-                    id=product['products'][0]['id'],
-                    name=product['products'][0]['name'],
-                    description=None,
-                    type_id=product['products'][0]['typeID'],
-                    available=product['products'][0]['available'],
-                    express_delivery=product['products'][0]['expressDelivery'],
-                    rating=product['products'][0]['averageRating'],
-                    attributes=list(map(lambda x: json.dumps(x), product['products'][0]['attributes']))
-                )
-            uow.products.add(new_product)
-            uow.commit()
-            
-            write_log(
-                event= events.ProductCrawled(product_id=product['products'][0]['id']),
+        else:
+            crawl_product(
+                cmd=commands.CrawlProduct(id=(cmd.id + 1)),
                 crawler=crawler,
                 uow=uow
-            )
+                )
     else:
         crawl_product(
             cmd=commands.CrawlProduct(id=(cmd.id + 1)),
@@ -100,14 +106,17 @@ def delete_product(
     cmd: commands.DeleteProduct, uow: unit_of_work.AbstractUnitOfWork
 ):
     with uow:
+        delete_log(
+            event=events.ProductDeleted(product_id=int(cmd.product_id)),
+            uow=uow
+        )
+
         product_obj = uow.products.get_by_product_id(int(cmd.product_id))
         if not product_obj:
             raise InvalidProduct("Invalid ProductID")
         
         uow.products.delete_by_product_id(product_id=product_obj.id)
         uow.commit()
-
-
 
 
 def write_log(
@@ -132,9 +141,29 @@ def write_log(
         )
 
 
+def delete_log(
+    event: events.ProductDeleted, uow: unit_of_work.SqlAlchemyUnitOfWork
+):
+    with uow:
+        log_obj = (
+            uow.session.query(orm.logs)
+            .filter(orm.logs.c.product_id == event.product_id)
+            .first()
+        )
+        if not log_obj:
+            raise InvalidLog("The product Hasn't Inserted into DB yet")
+        
+        uow.session.query(orm.logs).filter(
+            orm.logs.c.product_id == event.product_id
+        ).delete()
+        uow.commit()
+
+
+
 
 EVENT_HANDLERS: Dict[Type[events.Event], List[Callable]] = {
-    events.ProductCrawled: [write_log]
+    events.ProductCrawled: [write_log],
+    events.ProductDeleted: [delete_log],
 }
 
 COMMAND_HANDLERS: Dict[Type[commands.Command], Callable] = {

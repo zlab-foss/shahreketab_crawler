@@ -10,3 +10,7 @@ class Event:
 class ProductCrawled(Event):
     product_id: int
     
+
+@dataclass
+class ProductDeleted(Event):
+    product_id: int

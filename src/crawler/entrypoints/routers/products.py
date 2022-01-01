@@ -66,7 +66,10 @@ def get_router(bus: messagebus.MessageBus):
                 str(product_id)
             )
             bus.handle(cmd)
-        except exceptions.InvalidProduct as e:
+        except (
+            exceptions.InvalidProduct,
+            exceptions.InvalidLog
+        ) as e:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"{e}")
 
     return router
