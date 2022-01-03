@@ -151,7 +151,7 @@ def delete_log(
             .first()
         )
         if not log_obj:
-            raise InvalidLog("The product Hasn't Inserted into DB yet")
+            pass
         
         uow.session.query(orm.logs).filter(
             orm.logs.c.product_id == event.product_id
