@@ -32,23 +32,23 @@ app.include_router(products.get_router(bus))
 app.include_router(logs.get_router(bus))
 
 
-try:
-    # last_crawled_product = views.get_last_log(uow=unit_of_work.SqlAlchemyUnitOfWork)
-    last_crawled_product = 111429
-    handlers.crawl_product(
-        cmd=commands.CrawlProduct(id=(int(last_crawled_product)+1)),
-        crawler=shahrekeetabonline.AbstractCrawler,
-        uow=unit_of_work.AbstractUnitOfWork
-    )
+# try:
+#     # last_crawled_product = views.get_last_log(uow=unit_of_work.SqlAlchemyUnitOfWork)
+#     last_crawled_product = 111429
+#     handlers.crawl_product(
+#         cmd=commands.CrawlProduct(id=(int(last_crawled_product)+1)),
+#         crawler=shahrekeetabonline.AbstractCrawler,
+#         uow=unit_of_work.AbstractUnitOfWork
+#     )
     
     
-except exceptions.InvalidLog as e:
-    cmd = commands.CrawlProduct(id=1)
-    handlers.crawl_product(
-        cmd = commands.CrawlProduct(id=1),
-        crawler=shahrekeetabonline.AbstractCrawler,
-        uow=unit_of_work.AbstractUnitOfWork
-    )
+# except exceptions.InvalidLog as e:
+#     cmd = commands.CrawlProduct(id=1)
+#     handlers.crawl_product(
+#         cmd = commands.CrawlProduct(id=1),
+#         crawler=shahrekeetabonline.AbstractCrawler,
+#         uow=unit_of_work.AbstractUnitOfWork
+#     )
 
 
 @app.exception_handler(AuthJWTException)
