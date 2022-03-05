@@ -13,7 +13,7 @@ from src.crawler.entrypoints.routers import (
 from src.crawler.adapters import shahrekeetabonline
 from src.crawler.domain import commands
 from src.crawler import views
-from src.crawler.service_layer import exceptions, messagebus, handlers, unit_of_work
+from src.crawler.service_layer import exceptions, handlers, unit_of_work
 
 app = FastAPI()
 bus = bootstrap.bootstrap()
@@ -33,7 +33,7 @@ app.include_router(logs.get_router(bus))
 
 
 try:
-    last_crawled_product = views.get_last_log(unit_of_work.SqlAlchemyUnitOfWork)
+    last_crawled_product = views.get_last_log(uow=unit_of_work.SqlAlchemyUnitOfWork)
     handlers.crawl_product(
         cmd=commands.CrawlProduct(id=(int(last_crawled_product.product_id)+1)),
         crawler=shahrekeetabonline.AbstractCrawler,
