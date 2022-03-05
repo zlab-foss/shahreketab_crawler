@@ -36,7 +36,7 @@ try:
     # last_crawled_product = views.get_last_log(uow=unit_of_work.SqlAlchemyUnitOfWork)
     last_crawled_product = 111429
     handlers.crawl_product(
-        cmd=commands.CrawlProduct(id=(int(last_crawled_product.product_id)+1)),
+        cmd=commands.CrawlProduct(id=(int(last_crawled_product)+1)),
         crawler=shahrekeetabonline.AbstractCrawler,
         uow=unit_of_work.AbstractUnitOfWork
     )
