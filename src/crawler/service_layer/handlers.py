@@ -46,8 +46,8 @@ def crawl_product(
     crawler: shahrekeetabonline.AbstractCrawler,
     uow: unit_of_work.AbstractUnitOfWork
 ):
-    c = crawler()
-    product = c.get_products(
+    product = crawler.get_products(
+        self=shahrekeetabonline.Crawler,
         from_id=cmd.id,
         to_id=(cmd.id+1),
         page=1)
