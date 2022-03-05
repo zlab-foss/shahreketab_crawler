@@ -82,6 +82,7 @@ def crawl_product(
                     )
                 uow.products.add(new_product)
                 uow.commit()
+                print(f"product with id = {cmd.id} just crawled.")
                 
                 write_log(
                     event= events.ProductCrawled(product_id=product['products'][0]['id']),
